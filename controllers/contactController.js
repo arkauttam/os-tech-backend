@@ -1,23 +1,20 @@
-import nodemailer from "nodemailer";
+import { transporter } from "../config/mailer.js";
 
 export const sendContactMail = async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Recipient email missing",
+      });
+    }
 
     await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
-      to: process.env.TO_EMAIL,
-      subject: `Contact: ${subject}`,
+      from: process.env.MAIL_FROM,
+      to: process.env.MAIL_TO,
+      subject: `Contact Form: ${subject}`,
       html: `
         <h3>New Contact Message</h3>
         <p><b>Name:</b> ${name}</p>
@@ -27,10 +24,17 @@ export const sendContactMail = async (req, res) => {
       `,
     });
 
-    res.status(200).json({ success: true, message: "Email sent successfully" });
+    res.json({
+      success: true,
+      message: "Email sent successfully",
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Email failed to send" });
+    console.error("Mail error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Email failed to send",
+    });
   }
 };
