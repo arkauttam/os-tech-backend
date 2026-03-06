@@ -1,23 +1,19 @@
 import { transporter } from "../config/mailer.js";
 
-export const sendContactMail = async (req, res) => {
+export const sendContact = async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
     if (!name || !email || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+      return res.status(400).json({ message: "Missing fields" });
     }
 
     await transporter.sendMail({
-      from: `"OS Tech Labs" <${process.env.MAIL_FROM}>`,
-      to: process.env.MAIL_TO,
-      replyTo: email,
-      subject: subject,
+      from: process.env.FROM_EMAIL,
+      to: process.env.TO_EMAIL,
+      subject: `Contact Form: ${subject}`,
       html: `
-        <h2>New Contact Message</h2>
+        <h3>New Contact Message</h3>
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
         <p><b>Phone:</b> ${phone}</p>
@@ -27,16 +23,9 @@ export const sendContactMail = async (req, res) => {
       `,
     });
 
-    res.json({
-      success: true,
-      message: "Email sent successfully",
-    });
+    res.json({ success: true });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to send email",
-    });
+    res.status(500).json({ message: "Server error" });
   }
 };
