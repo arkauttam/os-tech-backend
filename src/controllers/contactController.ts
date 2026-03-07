@@ -1,6 +1,7 @@
+import { Request, Response } from "express";
 import { transporter } from "../config/mailer.js";
 
-export const sendContactMail = async (req, res) => {
+export const sendContactMail = async (req: Request, res: Response) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
@@ -13,7 +14,7 @@ export const sendContactMail = async (req, res) => {
 
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
-      to: process.env.MAIL_TO,
+      to: email,
       subject: `Contact Form: ${subject}`,
       html: `
         <h3>New Contact Message</h3>
@@ -28,7 +29,6 @@ export const sendContactMail = async (req, res) => {
       success: true,
       message: "Email sent successfully",
     });
-
   } catch (error) {
     console.error("Mail error:", error);
 
