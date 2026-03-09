@@ -11,7 +11,8 @@ export const sendContactMail = async (req: Request, res: Response) => {
         message: "Recipient email missing",
       });
     }
-
+    await transporter.verify();
+    console.log("SMTP server ready");
     await transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: email,

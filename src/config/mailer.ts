@@ -4,9 +4,11 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 export const transporter = nodemailer.createTransport({
-  host: "smtp.zeptomail.in",
-  port: 587,
-  secure: false, // important
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
