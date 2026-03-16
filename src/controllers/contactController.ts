@@ -40,25 +40,4 @@ export const sendContactMail = async (req: Request, res: Response) => {
   }
 };
 
-export const testApi = (req: Request, res: Response) => {
-  try {
-    const { name, email, phone, subject, message } = req.body;
 
-    res.status(200).json({
-      success: true,
-      message: "Test API working",
-      data: {
-        name,
-        email,
-        phone,
-        subject,
-        message,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Test API error",
-    });
-  }
-};
