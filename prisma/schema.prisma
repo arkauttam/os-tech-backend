@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////
+// ENUMS
+//////////////////////
+
 enum UserType {
   ADMIN
   CLIENT
@@ -16,6 +20,35 @@ enum Status {
   ACTIVE
   INACTIVE
 }
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+}
+
+enum ProjectCategory {
+  WEB
+  MOBILE
+  AI_ML
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+//////////////////////
+// AUTH MODELS
+//////////////////////
 
 model RefreshToken {
   id        String   @id @default(uuid())
@@ -36,12 +69,16 @@ model User {
   type      UserType @default(CLIENT)
   status    Status   @default(ACTIVE)
 
-  client Client?
-  tokens RefreshToken[]
+  client    Client?
+  tokens    RefreshToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+//////////////////////
+// CLIENT
+//////////////////////
 
 model Client {
   id     String @id @default(uuid())
@@ -51,6 +88,102 @@ model Client {
   company     String?
   designation String?
 
+  projects        Project[]
+  projectRequests ProjectRequest[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+//////////////////////
+// PROJECT
+//////////////////////
+
+model Project {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+
+  category    ProjectCategory
+  status      ProjectStatus
+
+  progress    Int              @default(0) // 0 - 100
+
+  totalAmount Float
+  paidAmount  Float            @default(0)
+
+  startDate   DateTime?
+  deadline    DateTime?
+
+  clientId    String
+  client      Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  payments    Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clientId])
+}
+
+//////////////////////
+// PAYMENT
+//////////////////////
+
+model Payment {
+  id         String        @id @default(uuid())
+  amount     Float
+
+  status     PaymentStatus @default(PENDING)
+  dueDate    DateTime?
+
+  projectId  String
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@index([projectId])
+}
+
+//////////////////////
+// PROJECT REQUEST
+//////////////////////
+
+model ProjectRequest {
+  id          String        @id @default(uuid())
+  name        String
+  description String
+
+  category    ProjectCategory
+
+  budget      Float
+  deadline    DateTime?
+
+  status      RequestStatus @default(PENDING)
+
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  documents   RequestDocument[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clientId])
+}
+
+//////////////////////
+// REQUEST DOCUMENTS
+//////////////////////
+
+model RequestDocument {
+  id        String   @id @default(uuid())
+  fileUrl   String
+
+  requestId String
+  request   ProjectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([requestId])
 }
