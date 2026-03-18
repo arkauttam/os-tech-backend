@@ -5,23 +5,21 @@ import jwt from "jsonwebtoken";
 import { signupSchema, loginSchema } from "../schemas/user.schema";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.util";
-
+import { ZodError } from "zod";
 export const userController = {
 
   // CLIENT SIGNUP
   async signup(req: Request, res: Response) {
-
     try {
-
       const data = signupSchema.parse(req.body);
 
       const exist = await prisma.user.findUnique({
-        where: { email: data.email }
+        where: { email: data.email },
       });
 
       if (exist) {
         return res.status(400).json({
-          message: "Email already exists"
+          message: "Email already exists",
         });
       }
 
@@ -31,33 +29,41 @@ export const userController = {
         data: {
           name: data.name,
           email: data.email,
-          contact: data.phone,
+          contact: data.contact,
           password: hashed,
-          type: "CLIENT"
-        }
+          type: "CLIENT",
+        },
       });
 
       await prisma.client.create({
         data: {
           userId: user.id,
           company: data.company,
-          designation: data.designation
-        }
+          designation: data.designation,
+        },
       });
 
       return res.status(201).json({
         success: true,
-        message: "Client registered successfully"
+        message: "Client registered successfully",
       });
 
     } catch (error) {
 
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: error,
+        });
+      }
+
+      console.error("SIGNUP ERROR:", error);
+
       return res.status(500).json({
-        message: "Signup failed"
+        message: "Signup failed",
+        error,
       });
-
     }
-
   },
 
   // LOGIN (ACCESS + REFRESH TOKEN)

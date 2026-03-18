@@ -12,8 +12,7 @@ router.post("/login", userController.login);
 
 router.post("/refresh-token", userController.refreshToken);
 
-router.post("/logout", userController.logout);
-
+router.post("/logout", authMiddleware, userController.logout);
 router.get("/profile", authMiddleware, userController.profile);
 
 router.post( "/admin", authMiddleware, adminOnly, adminController.createAdmin);
