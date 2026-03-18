@@ -12,7 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
-migrations
+prisma/migrations/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
